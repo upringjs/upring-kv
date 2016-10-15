@@ -1,0 +1,38 @@
+{
+  "name": "upring-kv",
+  "version": "0.0.1",
+  "description": "Key-Value store on top of UpRing",
+  "main": "kv.js",
+  "scripts": {
+    "test": "standard | snazzy && tap test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mcollina/upring-kv.git"
+  },
+  "keywords": [
+    "upring",
+    "consistent",
+    "hashring",
+    "key",
+    "value"
+  ],
+  "author": "Matteo Collina <hello@matteocollina.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mcollina/upring-kv/issues"
+  },
+  "homepage": "https://github.com/mcollina/upring-kv#readme",
+  "devDependencies": {
+    "pre-commit": "^1.1.3",
+    "snazzy": "^5.0.0",
+    "standard": "^8.4.0",
+    "tap": "^7.1.2"
+  },
+  "dependencies": {
+    "flush-write-stream": "^1.0.0",
+    "level": "^1.4.0",
+    "memdb": "^1.3.1",
+    "upring": "^0.11.0"
+  }
+}
