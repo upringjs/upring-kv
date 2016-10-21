@@ -47,3 +47,44 @@ test('get and put', function (t) {
     })
   })
 })
+
+test('moving data', function (t) {
+  t.plan(9)
+
+  const a = build()
+  t.tearDown(a.close.bind(a))
+
+  a.upring.on('up', function () {
+    t.pass('a up')
+    const b = build()
+
+    t.tearDown(b.close.bind(b))
+
+    b.upring.on('up', function () {
+      t.pass('b up')
+
+      var key = 'hello'
+
+      a.put(key, 'world', function (err) {
+        t.error(err)
+        b.upring.join(a.whoami(), function () {
+          t.pass('b joined')
+
+          b.get(key, function (err, value) {
+            t.error(err)
+            t.equal(value, 'world')
+
+            a.close(function () {
+              t.pass('closed')
+
+              b.get(key, function (err, value) {
+                t.error(err)
+                t.equal(value, 'world')
+              })
+            })
+          })
+        })
+      })
+    })
+  })
+})
