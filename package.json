@@ -30,8 +30,10 @@
     "tap": "^7.1.2"
   },
   "dependencies": {
+    "end-of-stream": "^1.1.0",
     "flush-write-stream": "^1.0.0",
     "level": "^1.4.0",
+    "through2": "^2.0.1",
     "upring": "^0.11.0"
   }
 }

@@ -2,6 +2,7 @@
 
 const UpRing = require('upring')
 const commands = require('./lib/commands')
+const through = require('through2')
 const ns = 'kv'
 
 function UpRingKV (opts) {
@@ -43,6 +44,18 @@ UpRingKV.prototype.get = function (key, cb) {
   this.upring.request({ key, ns, cmd: 'get' }, function (err, result) {
     cb(err, result ? result.value : null)
   })
+}
+
+UpRingKV.prototype.liveUpdates = function (key) {
+  const result = through.obj()
+
+  this.upring.request({ key, ns, cmd: 'liveUpdates', streams: { result } }, function (err) {
+    if (err) {
+      result.emit('error', err)
+    }
+  })
+
+  return result
 }
 
 UpRingKV.prototype.whoami = function () {
