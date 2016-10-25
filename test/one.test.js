@@ -21,6 +21,33 @@ test('get and put', function (t) {
   })
 })
 
+test('get and JS objects', function (t) {
+  t.plan(3)
+
+  instance.put('hello', { a: 42 }, function (err) {
+    t.error(err)
+
+    instance.get('hello', function (err, value) {
+      t.error(err)
+      t.deepEqual(value, { a: 42 })
+    })
+  })
+})
+
+test('clones the object', function (t) {
+  t.plan(3)
+
+  const obj = { a: 42 }
+  instance.put('hello', obj, function (err) {
+    t.error(err)
+
+    instance.get('hello', function (err, value) {
+      t.error(err)
+      t.notEqual(value, obj)
+    })
+  })
+})
+
 test('liveUpdates', function (t) {
   t.plan(5)
 

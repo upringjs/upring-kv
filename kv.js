@@ -3,6 +3,7 @@
 const UpRing = require('upring')
 const commands = require('./lib/commands')
 const through = require('through2')
+const clone = require('clone')
 const ns = 'kv'
 
 function UpRingKV (opts) {
@@ -32,6 +33,11 @@ UpRingKV.prototype.put = function (key, value, cb) {
     this.upring.once('up', this.put.bind(this, key, value, cb))
     return
   }
+
+  if (this.upring.allocatedToMe(key)) {
+    value = clone(value)
+  }
+
   this.upring.request({ key, value, ns, cmd: 'put' }, cb)
 }
 

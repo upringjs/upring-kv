@@ -33,6 +33,7 @@
     "tap": "^7.1.2"
   },
   "dependencies": {
+    "clone": "^2.0.0",
     "end-of-stream": "^1.1.0",
     "flush-write-stream": "^1.0.0",
     "level": "^1.4.0",
