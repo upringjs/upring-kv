@@ -16,6 +16,8 @@ npm i upring-kv --save
 
 ## Usage
 
+See [./example.js](./example.js) for exposing upring-kv over HTTP.
+
 ## API
 
   * <a href="#constructor"><code>UpRingKV</code></a>
