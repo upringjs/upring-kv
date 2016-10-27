@@ -50,6 +50,8 @@ Put `value` in the hashring for the given key.
 
 Returns a `Readable` stream in objectMode, which will include
 all updates of given `key`.
+It will emit the last value that was [`put`](#put), and it will re-emit
+it when reconnecting between multiple hosts.
 
 <a name="acknowledgements"></a>
 ## Acknowledgements
