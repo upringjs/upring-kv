@@ -2,8 +2,8 @@
 
 const UpRing = require('upring')
 const commands = require('./lib/commands')
-const through = require('through2')
 const clone = require('clone')
+const nes = require('never-ending-stream')
 const ns = 'kv'
 
 function UpRingKV (opts) {
@@ -53,15 +53,16 @@ UpRingKV.prototype.get = function (key, cb) {
 }
 
 UpRingKV.prototype.liveUpdates = function (key) {
-  const result = through.obj()
+  return nes.obj((done) => {
+    this.upring.request({ key, ns, cmd: 'liveUpdates' }, function (err, res) {
+      if (err) {
+        done(err)
+        return
+      }
 
-  this.upring.request({ key, ns, cmd: 'liveUpdates', streams: { result } }, function (err) {
-    if (err) {
-      result.emit('error', err)
-    }
+      done(null, res.streams.updates)
+    })
   })
-
-  return result
 }
 
 UpRingKV.prototype.whoami = function () {

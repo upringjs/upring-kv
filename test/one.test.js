@@ -51,12 +51,13 @@ test('clones the object', function (t) {
 test('liveUpdates', function (t) {
   t.plan(5)
 
+  const key = 'aaa'
   const expected = [
     'world',
     'matteo'
   ]
 
-  const stream = instance.liveUpdates('hello')
+  const stream = instance.liveUpdates(key)
     .on('data', function (data) {
       t.deepEqual(data, expected.shift())
       if (expected.length === 0) {
@@ -67,9 +68,9 @@ test('liveUpdates', function (t) {
 
   t.tearDown(stream.destroy.bind(stream))
 
-  instance.put('hello', 'world', function (err) {
+  instance.put(key, 'world', function (err) {
     t.error(err)
-    instance.put('hello', 'matteo', function (err) {
+    instance.put(key, 'matteo', function (err) {
       t.error(err)
     })
   })
@@ -77,6 +78,8 @@ test('liveUpdates', function (t) {
 
 test('liveUpdates double', function (t) {
   t.plan(8)
+
+  const key = 'hello2'
 
   const expected1 = [
     'world',
@@ -88,7 +91,7 @@ test('liveUpdates double', function (t) {
     'matteo'
   ]
 
-  const stream1 = instance.liveUpdates('hello')
+  const stream1 = instance.liveUpdates(key)
     .on('data', function (data) {
       t.deepEqual(data, expected1.shift())
       if (expected1.length === 0) {
@@ -99,7 +102,7 @@ test('liveUpdates double', function (t) {
 
   t.tearDown(stream1.destroy.bind(stream1))
 
-  const stream2 = instance.liveUpdates('hello')
+  const stream2 = instance.liveUpdates(key)
     .on('data', function (data) {
       t.deepEqual(data, expected2.shift())
       if (expected2.length === 0) {
@@ -110,8 +113,36 @@ test('liveUpdates double', function (t) {
 
   t.tearDown(stream2.destroy.bind(stream2))
 
+  instance.put(key, 'world', function (err) {
+    t.error(err)
+    instance.put(key, 'matteo', function (err) {
+      t.error(err)
+    })
+  })
+})
+
+test('liveUpdates after', function (t) {
+  t.plan(5)
+
+  const expected = [
+    'world',
+    'matteo'
+  ]
+
   instance.put('hello', 'world', function (err) {
     t.error(err)
+
+    const stream = instance.liveUpdates('hello')
+      .on('data', function (data) {
+        t.deepEqual(data, expected.shift())
+        if (expected.length === 0) {
+          stream.destroy()
+          setImmediate(t.pass.bind(t), 'destroyed')
+        }
+      })
+
+    t.tearDown(stream.destroy.bind(stream))
+
     instance.put('hello', 'matteo', function (err) {
       t.error(err)
     })
