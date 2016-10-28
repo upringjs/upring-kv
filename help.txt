@@ -1,0 +1,9 @@
+Usage: upring-kv [options] base..
+
+Options:
+  -h/--help             print this help
+  -p/--port PORT        the HTTP port to listen to
+  -P/--points POINTS    the number of points each peer has
+  -t/--timeout MS       millis to wait the peer to join the base
+  -V/--verbose          verbose mode on
+  -v/--version          the version of upring-kv

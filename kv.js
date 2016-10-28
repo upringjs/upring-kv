@@ -1,9 +1,9 @@
 'use strict'
 
 const UpRing = require('upring')
-const commands = require('./lib/commands')
 const clone = require('clone')
 const nes = require('never-ending-stream')
+const commands = require('./lib/commands')
 const ns = 'kv'
 
 function UpRingKV (opts) {

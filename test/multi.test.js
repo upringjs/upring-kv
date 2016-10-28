@@ -140,3 +140,39 @@ test('liveUpdates', function (t) {
     })
   })
 })
+
+test('get empty', function (t) {
+  t.plan(7)
+
+  const a = build()
+  t.tearDown(a.close.bind(a))
+
+  a.upring.on('up', function () {
+    t.pass('a up')
+    const b = build(a)
+
+    t.tearDown(b.close.bind(b))
+
+    b.upring.on('up', function () {
+      t.pass('b up')
+
+      b.get('hello', function (err, res) {
+        t.error(err)
+        t.equal(res, undefined)
+
+        const c = build(a)
+
+        t.tearDown(c.close.bind(c))
+
+        c.upring.on('up', function () {
+          t.pass('c up')
+
+          c.get('hello', function (err, res) {
+            t.error(err)
+            t.equal(res, undefined)
+          })
+        })
+      })
+    })
+  })
+})

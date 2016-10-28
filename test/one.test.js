@@ -8,6 +8,15 @@ const instance = build()
 
 t.tearDown(instance.close.bind(instance))
 
+test('get empty', function (t) {
+  t.plan(2)
+
+  instance.get('hello', function (err, value) {
+    t.error(err)
+    t.equal(value, undefined)
+  })
+})
+
 test('get and put', function (t) {
   t.plan(3)
 
