@@ -9,6 +9,7 @@ const querystring = require('querystring')
 const Transform = require('readable-stream').Transform
 const pino = require('pino-http')
 const pump = require('pump')
+const urlFormatLax = require('url-format-lax')
 const args = require('minimist')(process.argv.slice(2), {
   boolean: ['help', 'verbose'],
   default: {
@@ -72,7 +73,20 @@ db.upring.on('up', function () {
       throw err
     }
 
-    console.log('server listening on', server.address())
+    const address = server.address()
+
+    if (address.address === '::') {
+      address.host = '::1'
+    } else {
+      address.host = address.address
+    }
+
+    const url = 'http://' + urlFormatLax(address)
+
+    // expose the address
+    db.upring.info.url = url
+
+    console.log('server listening on', url)
   })
 
   function handleGet (req, res) {
@@ -127,8 +141,12 @@ db.upring.on('up', function () {
     })
 
     req.on('end', function () {
+      var contentType = req.headers['content-type']
+      if (!contentType || contentType === 'application/x-www-form-urlencoded') {
+        contentType = 'text/plain'
+      }
       db.put(req.url, {
-        contentType: req.headers['content-type'],
+        contentType,
         value: str
       }, function (err) {
         if (err) {
