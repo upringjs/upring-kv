@@ -25,7 +25,7 @@ test('get and put', function (t) {
       for (var i = 0; i < maxInt && !this.allocatedToMe(key); i += 1) {
         key = 'hello' + i
       }
-      // key is now allocated to a b
+      // key is now allocated to b
 
       a.put(key, 'world', function (err) {
         t.error(err)
@@ -49,7 +49,7 @@ test('get and put', function (t) {
 })
 
 test('moving data', function (t) {
-  t.plan(9)
+  t.plan(13)
 
   const a = build()
   t.tearDown(a.close.bind(a))
@@ -65,6 +65,11 @@ test('moving data', function (t) {
 
       var key = 'hello'
 
+      for (var i = 0; i < maxInt && !a.upring.allocatedToMe(key); i += 1) {
+        key = 'hello' + i
+      }
+      // key is now allocated to a
+
       a.put(key, 'world', function (err) {
         t.error(err)
         b.upring.join(a.whoami(), function () {
@@ -74,13 +79,40 @@ test('moving data', function (t) {
             t.error(err)
             t.equal(value, 'world')
 
-            a.close(function () {
-              t.pass('closed')
+            var c
 
-              b.get(key, function (err, value) {
-                t.error(err)
-                t.equal(value, 'world')
+            b.upring.once('peerDown', function (peer) {
+              c = build(b)
+
+              t.tearDown(c.close.bind(c))
+
+              b.upring.on('peerUp', function (peer) {
+                c.get(key, function (err, value) {
+                  t.error(err)
+                  t.equal(value, 'world')
+
+                  closeAndGet()
+                })
               })
+
+              c.upring.on('up', function () {
+                t.pass('c joined')
+              })
+            })
+
+            function closeAndGet () {
+              b.close(function () {
+                t.pass('b closed')
+
+                c.get(key, function (err, value) {
+                  t.error(err)
+                  t.equal(value, 'world')
+                })
+              })
+            }
+
+            a.close(function () {
+              t.pass('a closed')
             })
           })
         })
@@ -90,7 +122,7 @@ test('moving data', function (t) {
 })
 
 test('liveUpdates', function (t) {
-  t.plan(8)
+  t.plan(9)
 
   const a = build()
   t.tearDown(a.close.bind(a))
@@ -109,13 +141,13 @@ test('liveUpdates', function (t) {
       for (var i = 0; i < maxInt && !this.allocatedToMe(key); i += 1) {
         key = 'bbb' + i
       }
-      // key is now allocated to a b
+      // key is now allocated to b
 
       a.put(key, 'world', function (err) {
         t.error(err)
 
         const stream = a.liveUpdates(key)
-        const expected = ['matteo', 'luca']
+        const expected = ['world', 'matteo', 'luca']
 
         stream.on('data', function (chunk) {
           t.deepEqual(chunk, expected.shift(), 'chunk matches')
@@ -125,14 +157,16 @@ test('liveUpdates', function (t) {
           t.fail('no error in stream')
         })
 
-        b.put(key, 'matteo', function (err) {
-          t.error(err)
+        stream.once('newStream', function () {
+          b.put(key, 'matteo', function (err) {
+            t.error(err)
 
-          b.close(function () {
-            t.pass('closed')
+            b.close(function () {
+              t.pass('closed')
 
-            a.put(key, 'luca', function (err) {
-              t.error(err)
+              a.put(key, 'luca', function (err) {
+                t.error(err)
+              })
             })
           })
         })

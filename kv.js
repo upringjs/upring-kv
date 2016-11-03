@@ -53,16 +53,20 @@ UpRingKV.prototype.get = function (key, cb) {
 }
 
 UpRingKV.prototype.liveUpdates = function (key) {
-  return nes.obj((done) => {
+  const result = nes.obj((done) => {
     this.upring.request({ key, ns, cmd: 'liveUpdates' }, function (err, res) {
       if (err) {
         done(err)
         return
       }
 
+      result.emit('newStream')
+
       done(null, res.streams.updates)
     })
   })
+
+  return result
 }
 
 UpRingKV.prototype.whoami = function () {
