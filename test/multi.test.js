@@ -48,6 +48,42 @@ test('get and put', function (t) {
   })
 })
 
+test('get empty', function (t) {
+  t.plan(7)
+
+  const a = build()
+  t.tearDown(a.close.bind(a))
+
+  a.upring.on('up', function () {
+    t.pass('a up')
+    const b = build(a)
+
+    t.tearDown(b.close.bind(b))
+
+    b.upring.on('up', function () {
+      t.pass('b up')
+
+      b.get('hello', function (err, res) {
+        t.error(err)
+        t.equal(res, undefined)
+
+        const c = build(a)
+
+        t.tearDown(c.close.bind(c))
+
+        c.upring.on('up', function () {
+          t.pass('c up')
+
+          c.get('hello', function (err, res) {
+            t.error(err)
+            t.equal(res, undefined)
+          })
+        })
+      })
+    })
+  })
+})
+
 test('moving data', function (t) {
   t.plan(13)
 
@@ -161,49 +197,15 @@ test('liveUpdates', function (t) {
           b.put(key, 'matteo', function (err) {
             t.error(err)
 
-            b.close(function () {
-              t.pass('closed')
+            stream.once('data', function () {
+              b.close(function () {
+                t.pass('closed')
 
-              a.put(key, 'luca', function (err) {
-                t.error(err)
+                a.put(key, 'luca', function (err) {
+                  t.error(err)
+                })
               })
             })
-          })
-        })
-      })
-    })
-  })
-})
-
-test('get empty', function (t) {
-  t.plan(7)
-
-  const a = build()
-  t.tearDown(a.close.bind(a))
-
-  a.upring.on('up', function () {
-    t.pass('a up')
-    const b = build(a)
-
-    t.tearDown(b.close.bind(b))
-
-    b.upring.on('up', function () {
-      t.pass('b up')
-
-      b.get('hello', function (err, res) {
-        t.error(err)
-        t.equal(res, undefined)
-
-        const c = build(a)
-
-        t.tearDown(c.close.bind(c))
-
-        c.upring.on('up', function () {
-          t.pass('c up')
-
-          c.get('hello', function (err, res) {
-            t.error(err)
-            t.equal(res, undefined)
           })
         })
       })
