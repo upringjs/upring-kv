@@ -39,7 +39,6 @@
     "clone": "^2.0.0",
     "end-of-stream": "^1.1.0",
     "flush-write-stream": "^1.0.0",
-    "level": "^1.4.0",
     "minimist": "^1.2.0",
     "never-ending-stream": "^2.0.0",
     "pino-http": "^1.3.0",
