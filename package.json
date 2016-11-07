@@ -1,6 +1,6 @@
 {
   "name": "upring-kv",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Key-Value store on top of UpRing",
   "main": "kv.js",
   "bin": {
