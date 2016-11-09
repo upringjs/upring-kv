@@ -15,7 +15,7 @@ const args = require('minimist')(process.argv.slice(2), {
   default: {
     port: 0,
     points: 100,
-    timeout: 200,
+    timeout: 1000,
     verbose: false
   },
   alias: {

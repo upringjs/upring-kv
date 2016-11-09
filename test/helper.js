@@ -12,7 +12,7 @@ function build (main) {
 
   return UpRingKV({
     base,
-    logLevel: 'error',
+    logLevel: 'fatal',
     hashring: {
       joinTimeout
     }
