@@ -28,7 +28,7 @@ const args = require('minimist')(process.argv.slice(2), {
 })
 
 if (args.help) {
-  console.log(fs.readFileSync(path.join(__dirname, 'help.txt')))
+  console.log(fs.readFileSync(path.join(__dirname, 'help.txt'), 'utf8'))
   process.exit(1)
 }
 
@@ -107,7 +107,6 @@ db.upring.on('up', function () {
         }
       })
       pump(db.liveUpdates(key), transform, res)
-      return
     } else {
       db.get(key, function (err, data) {
         if (err) {
