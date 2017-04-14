@@ -1,6 +1,6 @@
 {
   "name": "upring-kv",
-  "version": "0.4.5",
+  "version": "0.4.6",
   "description": "Key-Value store on top of UpRing",
   "main": "kv.js",
   "bin": {
@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mcollina/upring-kv.git"
+    "url": "git+https://github.com/upringjs/upring-kv.git"
   },
   "keywords": [
     "upring",
@@ -25,9 +25,9 @@
   "author": "Matteo Collina <hello@matteocollina.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/mcollina/upring-kv/issues"
+    "url": "https://github.com/upringjs/upring-kv/issues"
   },
-  "homepage": "https://github.com/mcollina/upring-kv#readme",
+  "homepage": "https://github.com/upringjs/upring-kv#readme",
   "devDependencies": {
     "coveralls": "^2.11.14",
     "pre-commit": "^1.1.3",

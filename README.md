@@ -115,9 +115,9 @@ This project is kindly sponsored by [nearForm](http://nearform.com).
 
 MIT
 
-[coveralls-badge]: https://coveralls.io/repos/github/mcollina/upring-kv/badge.svg?branch=master
-[coveralls-url]: https://coveralls.io/github/mcollina/upring-kv?branch=master
+[coveralls-badge]: https://coveralls.io/repos/github/upringjs/upring-kv/badge.svg?branch=master
+[coveralls-url]: https://coveralls.io/github/upringjs/upring-kv?branch=master
 [npm-badge]: https://badge.fury.io/js/upring-kv.svg
 [npm-url]: https://badge.fury.io/js/upring-kv
-[travis-badge]: https://api.travis-ci.org/mcollina/upring-kv.svg
-[travis-url]: https://travis-ci.org/mcollina/upring-kv
+[travis-badge]: https://api.travis-ci.org/upringjs/upring-kv.svg
+[travis-url]: https://travis-ci.org/upringjs/upring-kv
