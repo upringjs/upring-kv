@@ -1,35 +1,33 @@
 'use strict'
 
-const UpRing = require('upring')
 const clone = require('clone')
 const nes = require('never-ending-stream')
 const commands = require('./lib/commands')
-const ns = 'kv'
 
-function UpRingKV (opts) {
-  if (!(this instanceof UpRingKV)) {
-    return new UpRingKV(opts)
+module.exports = function (upring, opts, next) {
+  if (upring.kv) {
+    return next(new Error('kv property already exist'))
   }
+  upring.kv = new UpRingKV(upring, opts)
+  next()
+}
 
+function UpRingKV (upring, opts) {
   opts = opts || {}
 
-  this.upring = opts.upring || new UpRing(opts)
+  this.upring = upring
 
-  this._ready = false
   this.closed = false
+  this.ns = opts.namespace || 'kv'
 
   commands(this)
 
   // expose the parent logger
   this.logger = this.upring.logger
-
-  this.upring.on('up', () => {
-    this._ready = true
-  })
 }
 
 UpRingKV.prototype.put = function (key, value, cb) {
-  if (!this._ready) {
+  if (!this.upring.isReady) {
     this.upring.once('up', this.put.bind(this, key, value, cb))
     return
   }
@@ -38,23 +36,35 @@ UpRingKV.prototype.put = function (key, value, cb) {
     value = clone(value)
   }
 
-  this.upring.request({ key, value, ns, cmd: 'put' }, cb)
+  if (typeof cb === 'function') {
+    this.upring.request({ key, value, ns: this.ns, cmd: 'put' }, cb)
+  } else {
+    this.upring.requestp({ key, value, ns: this.ns, cmd: 'put' })
+  }
 }
 
 UpRingKV.prototype.get = function (key, cb) {
-  if (!this._ready) {
+  if (!this.upring.isReady) {
     this.upring.once('up', this.get.bind(this, key, cb))
     return
   }
 
-  this.upring.request({ key, ns, cmd: 'get' }, function (err, result) {
-    cb(err, result ? result.value : null)
-  })
+  if (typeof cb === 'function') {
+    this.upring.request({ key, ns: this.ns, cmd: 'get' }, function (err, result) {
+      cb(err, result ? result.value : null)
+    })
+  } else {
+    return new Promise((resolve, reject) => {
+      this.upring.requestp({ key, ns: this.ns, cmd: 'get' })
+        .then(result => resolve(result.value))
+        .catch(err => reject(err))
+    })
+  }
 }
 
 UpRingKV.prototype.liveUpdates = function (key) {
   const result = nes.obj((done) => {
-    this.upring.request({ key, ns, cmd: 'liveUpdates' }, function (err, res) {
+    this.upring.request({ key, ns: this.ns, cmd: 'liveUpdates' }, function (err, res) {
       if (err) {
         done(err)
         return
@@ -68,30 +78,3 @@ UpRingKV.prototype.liveUpdates = function (key) {
 
   return result
 }
-
-UpRingKV.prototype.whoami = function () {
-  return this.upring.whoami()
-}
-
-UpRingKV.prototype.close = function (cb) {
-  cb = cb || noop
-  if (!this._ready) {
-    this.upring.once('up', this.close.bind(this, cb))
-    return
-  }
-
-  if (this.closed) {
-    cb()
-    return
-  }
-
-  this.closed = true
-
-  this.upring.close((err) => {
-    cb(err)
-  })
-}
-
-function noop () {}
-
-module.exports = UpRingKV
