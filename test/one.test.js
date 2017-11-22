@@ -11,19 +11,21 @@ t.tearDown(instance.close.bind(instance))
 test('get empty', function (t) {
   t.plan(2)
 
-  instance.get('hello', function (err, value) {
-    t.error(err)
-    t.equal(value, undefined)
+  instance.ready(() => {
+    instance.kv.get('hello', function (err, value) {
+      t.error(err)
+      t.equal(value, undefined)
+    })
   })
 })
 
 test('get and put', function (t) {
   t.plan(3)
 
-  instance.put('hello', 'world', function (err) {
+  instance.kv.put('hello', 'world', function (err) {
     t.error(err)
 
-    instance.get('hello', function (err, value) {
+    instance.kv.get('hello', function (err, value) {
       t.error(err)
       t.equal(value, 'world')
     })
@@ -33,10 +35,10 @@ test('get and put', function (t) {
 test('get and JS objects', function (t) {
   t.plan(3)
 
-  instance.put('hello', { a: 42 }, function (err) {
+  instance.kv.put('hello', { a: 42 }, function (err) {
     t.error(err)
 
-    instance.get('hello', function (err, value) {
+    instance.kv.get('hello', function (err, value) {
       t.error(err)
       t.deepEqual(value, { a: 42 })
     })
@@ -47,10 +49,10 @@ test('clones the object', function (t) {
   t.plan(3)
 
   const obj = { a: 42 }
-  instance.put('hello', obj, function (err) {
+  instance.kv.put('hello', obj, function (err) {
     t.error(err)
 
-    instance.get('hello', function (err, value) {
+    instance.kv.get('hello', function (err, value) {
       t.error(err)
       t.notEqual(value, obj)
     })
@@ -66,7 +68,7 @@ test('liveUpdates', function (t) {
     'matteo'
   ]
 
-  const stream = instance.liveUpdates(key)
+  const stream = instance.kv.liveUpdates(key)
     .on('data', function (data) {
       t.deepEqual(data, expected.shift())
       if (expected.length === 0) {
@@ -77,9 +79,9 @@ test('liveUpdates', function (t) {
 
   t.tearDown(stream.destroy.bind(stream))
 
-  instance.put(key, 'world', function (err) {
+  instance.kv.put(key, 'world', function (err) {
     t.error(err)
-    instance.put(key, 'matteo', function (err) {
+    instance.kv.put(key, 'matteo', function (err) {
       t.error(err)
     })
   })
@@ -100,7 +102,7 @@ test('liveUpdates double', function (t) {
     'matteo'
   ]
 
-  const stream1 = instance.liveUpdates(key)
+  const stream1 = instance.kv.liveUpdates(key)
     .on('data', function (data) {
       t.deepEqual(data, expected1.shift())
       if (expected1.length === 0) {
@@ -111,7 +113,7 @@ test('liveUpdates double', function (t) {
 
   t.tearDown(stream1.destroy.bind(stream1))
 
-  const stream2 = instance.liveUpdates(key)
+  const stream2 = instance.kv.liveUpdates(key)
     .on('data', function (data) {
       t.deepEqual(data, expected2.shift())
       if (expected2.length === 0) {
@@ -122,9 +124,9 @@ test('liveUpdates double', function (t) {
 
   t.tearDown(stream2.destroy.bind(stream2))
 
-  instance.put(key, 'world', function (err) {
+  instance.kv.put(key, 'world', function (err) {
     t.error(err)
-    instance.put(key, 'matteo', function (err) {
+    instance.kv.put(key, 'matteo', function (err) {
       t.error(err)
     })
   })
@@ -138,10 +140,10 @@ test('liveUpdates after', function (t) {
     'matteo'
   ]
 
-  instance.put('hello', 'world', function (err) {
+  instance.kv.put('hello', 'world', function (err) {
     t.error(err)
 
-    const stream = instance.liveUpdates('hello')
+    const stream = instance.kv.liveUpdates('hello')
       .on('data', function (data) {
         t.deepEqual(data, expected.shift())
         if (expected.length === 0) {
@@ -152,8 +154,15 @@ test('liveUpdates after', function (t) {
 
     t.tearDown(stream.destroy.bind(stream))
 
-    instance.put('hello', 'matteo', function (err) {
+    instance.kv.put('hello', 'matteo', function (err) {
       t.error(err)
     })
   })
 })
+
+if (Number(process.versions.node[0]) >= 8) {
+  require('./async-await')(instance, t)
+} else {
+  t.pass('Skip because Node version < 8')
+  t.end()
+}

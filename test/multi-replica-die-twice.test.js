@@ -13,7 +13,7 @@ var c
 var b
 var key
 
-a.upring.on('up', function () {
+a.on('up', function () {
   t.pass('a up')
 
   join(a, function (instance) {
@@ -22,15 +22,15 @@ a.upring.on('up', function () {
 
     key = 'hello'
 
-    for (var i = 0; i < maxInt && !a.upring.allocatedToMe(key); i += 1) {
+    for (var i = 0; i < maxInt && !a.allocatedToMe(key); i += 1) {
       key = 'hello' + i
     }
     // key is now allocated to a
 
-    a.put(key, 'world', function (err) {
+    a.kv.put(key, 'world', function (err) {
       t.error(err)
 
-      b.get(key, function (err, value) {
+      b.kv.get(key, function (err, value) {
         t.error(err)
         t.equal(value, 'world')
 
@@ -41,7 +41,7 @@ a.upring.on('up', function () {
             t.pass('c joined')
             c = instance
 
-            c.get(key, function (err, value) {
+            c.kv.get(key, function (err, value) {
               t.error(err)
               t.equal(value, 'world')
 
@@ -56,7 +56,7 @@ a.upring.on('up', function () {
 
 function afterDown (prev, next, cb) {
   var count = 0
-  next.upring.once('peerDown', function () {
+  next.once('peerDown', function () {
     if (++count === 2) {
       cb()
     }
@@ -73,7 +73,7 @@ function join (main, cb) {
 
   t.tearDown(instance.close.bind(instance))
 
-  instance.upring.on('up', function () {
+  instance.on('up', function () {
     cb(instance)
   })
 }
@@ -82,7 +82,7 @@ function closeBAndGet () {
   afterDown(b, c, function () {
     t.pass('b closed')
 
-    c.get(key, function (err, value) {
+    c.kv.get(key, function (err, value) {
       t.error(err)
       t.equal(value, 'world')
 
@@ -92,7 +92,7 @@ function closeBAndGet () {
           afterDown(c, d, function () {
             t.pass('c closed')
 
-            d.get(key, function (err, value) {
+            d.kv.get(key, function (err, value) {
               t.error(err)
               t.equal(value, 'world')
             })

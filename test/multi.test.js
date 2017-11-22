@@ -11,13 +11,13 @@ test('get and put', function (t) {
   const a = build()
   t.tearDown(a.close.bind(a))
 
-  a.upring.on('up', function () {
+  a.on('up', function () {
     t.pass('a up')
     const b = build(a)
 
     t.tearDown(b.close.bind(b))
 
-    b.upring.on('up', function () {
+    b.on('up', function () {
       t.pass('b up')
       var key = 'hello'
 
@@ -27,17 +27,17 @@ test('get and put', function (t) {
       }
       // key is now allocated to b
 
-      a.put(key, 'world', function (err) {
+      a.kv.put(key, 'world', function (err) {
         t.error(err)
 
-        b.get(key, function (err, value) {
+        b.kv.get(key, function (err, value) {
           t.error(err)
           t.equal(value, 'world')
 
           b.close(function () {
             t.pass('closed')
 
-            a.get(key, function (err, value) {
+            a.kv.get(key, function (err, value) {
               t.error(err)
               t.equal(value, 'world')
             })
@@ -54,16 +54,16 @@ test('get empty', function (t) {
   const a = build()
   t.tearDown(a.close.bind(a))
 
-  a.upring.on('up', function () {
+  a.on('up', function () {
     t.pass('a up')
     const b = build(a)
 
     t.tearDown(b.close.bind(b))
 
-    b.upring.on('up', function () {
+    b.on('up', function () {
       t.pass('b up')
 
-      b.get('hello', function (err, res) {
+      b.kv.get('hello', function (err, res) {
         t.error(err)
         t.equal(res, undefined)
 
@@ -71,10 +71,10 @@ test('get empty', function (t) {
 
         t.tearDown(c.close.bind(c))
 
-        c.upring.on('up', function () {
+        c.on('up', function () {
           t.pass('c up')
 
-          c.get('hello', function (err, res) {
+          c.kv.get('hello', function (err, res) {
             t.error(err)
             t.equal(res, undefined)
           })
@@ -90,48 +90,50 @@ test('moving data', function (t) {
   const a = build()
   t.tearDown(a.close.bind(a))
 
-  a.upring.on('up', function () {
+  a.on('up', function () {
     t.pass('a up')
     const b = build()
 
     t.tearDown(b.close.bind(b))
 
-    b.upring.on('up', function () {
+    b.on('up', function () {
       t.pass('b up')
 
       var key = 'hello'
 
-      for (var i = 0; i < maxInt && !a.upring.allocatedToMe(key); i += 1) {
+      for (var i = 0; i < maxInt && !a.allocatedToMe(key); i += 1) {
         key = 'hello' + i
       }
       // key is now allocated to a
 
-      a.put(key, 'world', function (err) {
+      a.kv.put(key, 'world', function (err) {
         t.error(err)
-        b.upring.join(a.whoami(), function () {
+        b.join(a.whoami(), function () {
           t.pass('b joined')
 
-          b.get(key, function (err, value) {
+          b.kv.get(key, function (err, value) {
             t.error(err)
             t.equal(value, 'world')
 
             var c
 
-            b.upring.once('peerDown', function (peer) {
+            b.once('peerDown', function (peer) {
               c = build(b)
 
               t.tearDown(c.close.bind(c))
 
-              b.upring.on('peerUp', function (peer) {
-                c.get(key, function (err, value) {
-                  t.error(err)
-                  t.equal(value, 'world')
+              b.on('peerUp', function (peer) {
+                c.ready(() => {
+                  c.kv.get(key, function (err, value) {
+                    t.error(err)
+                    t.equal(value, 'world')
 
-                  closeAndGet()
+                    closeAndGet()
+                  })
                 })
               })
 
-              c.upring.on('up', function () {
+              c.on('up', function () {
                 t.pass('c joined')
               })
             })
@@ -140,7 +142,7 @@ test('moving data', function (t) {
               b.close(function () {
                 t.pass('b closed')
 
-                c.get(key, function (err, value) {
+                c.kv.get(key, function (err, value) {
                   t.error(err)
                   t.equal(value, 'world')
                 })
@@ -163,13 +165,13 @@ test('liveUpdates', function (t) {
   const a = build()
   t.tearDown(a.close.bind(a))
 
-  a.upring.on('up', function () {
+  a.on('up', function () {
     t.pass('a up')
     const b = build(a)
 
     t.tearDown(b.close.bind(b))
 
-    b.upring.on('up', function () {
+    b.on('up', function () {
       t.pass('b up')
       var key = 'bbb'
 
@@ -179,10 +181,10 @@ test('liveUpdates', function (t) {
       }
       // key is now allocated to b
 
-      a.put(key, 'world', function (err) {
+      a.kv.put(key, 'world', function (err) {
         t.error(err)
 
-        const stream = a.liveUpdates(key)
+        const stream = a.kv.liveUpdates(key)
         const expected = ['world', 'matteo', 'luca']
 
         stream.on('data', function (chunk) {
@@ -194,14 +196,14 @@ test('liveUpdates', function (t) {
         })
 
         stream.once('newStream', function () {
-          b.put(key, 'matteo', function (err) {
+          b.kv.put(key, 'matteo', function (err) {
             t.error(err)
 
             stream.once('data', function () {
               b.close(function () {
                 t.pass('closed')
 
-                a.put(key, 'luca', function (err) {
+                a.kv.put(key, 'luca', function (err) {
                   t.error(err)
                 })
               })
