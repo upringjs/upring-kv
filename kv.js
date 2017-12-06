@@ -23,7 +23,7 @@ function UpRingKV (upring, opts) {
   commands(this)
 
   // expose the parent logger
-  this.logger = this.upring.logger
+  this.log = this.upring.log
 }
 
 UpRingKV.prototype.put = function (key, value, cb) {
