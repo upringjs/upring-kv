@@ -1,7 +1,7 @@
 'use strict'
 
-const UpRingKV = require('..')
-const joinTimeout = 200
+const upring = require('upring')
+const upringKV = require('..')
 
 function build (main) {
   const base = []
@@ -10,15 +10,18 @@ function build (main) {
     base.push(main.whoami())
   }
 
-  return UpRingKV({
-    base,
+  const instance = upring({
     logLevel: 'fatal',
+    base: base,
     hashring: {
-      joinTimeout
+      joinTimeout: 200,
+      replicaPoints: 10
     }
   })
-}
 
-build.joinTimeout = joinTimeout
+  instance.use(upringKV)
+
+  return instance
+}
 
 module.exports.build = build
