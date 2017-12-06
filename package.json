@@ -1,6 +1,6 @@
 {
   "name": "upring-kv",
-  "version": "0.4.6",
+  "version": "0.5.0",
   "description": "Key-Value store plugin for UpRing",
   "main": "kv.js",
   "scripts": {
