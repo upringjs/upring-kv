@@ -36,8 +36,8 @@
     "pre-commit": "^1.2.2",
     "snazzy": "^7.0.0",
     "standard": "^10.0.3",
-    "tap": "^10.7.3",
-    "upring": "^0.21.0"
+    "tap": "^11.0.0",
+    "upring": "^0.22.0"
   },
   "dependencies": {
     "clone": "^2.1.1",
